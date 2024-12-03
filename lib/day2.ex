@@ -36,28 +36,4 @@ defmodule Day2 do
       true -> diff
     end
   end
-
-  def run2 do
-    AOC.read_file(@input_path)
-    |> Enum.map(&String.split(&1, " "))
-    |> Enum.map(&AOC.list_to_integer/1)
-    |> Enum.map(&prepare_report/1)
-    |> Enum.map(fn {report_data, chunks} ->
-      if not is_nil(safe_report?(chunks)) do
-        report_data
-      else
-        nil
-      end
-    end)
-    |> Enum.count(&(not is_nil(&1)))
-  end
-
-  defp prepare_report(report_data) do
-    chunks =
-      report_data
-      |> Enum.chunk_every(2, 1, :discard)
-      |> Enum.map(fn [l, r] -> l - r end)
-
-    {report_data, chunks}
-  end
 end
