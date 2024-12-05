@@ -1,4 +1,6 @@
 defmodule AOC do
+  require Logger
+
   def read_file(file_path) do
     Path.expand(file_path)
     |> File.stream!([:line])
@@ -24,6 +26,10 @@ defmodule AOC do
 
   def list(list) do
     inspect(list, charlists: :as_lists)
+  end
+
+  def print_list(list, prefix \\ "") do
+    Logger.info("#{prefix} = #{AOC.list(list)}")
   end
 
   def remove_at(list, idx) when is_list(list) and is_number(idx) do
