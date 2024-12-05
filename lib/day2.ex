@@ -1,6 +1,6 @@
 defmodule Day2 do
   require Logger
-  @input_path "./input/day2.txt"
+  @input_path "day2.txt"
   #
   # part1: 287
   def run(tolerance \\ 0) do

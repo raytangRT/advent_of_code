@@ -3,7 +3,7 @@ defmodule Day1 do
   require AOC
 
   @delimiator "   "
-  @input_path "./input/day1.txt"
+  @input_path "day1.txt"
 
   def run() do
     AOC.read_file(@input_path)

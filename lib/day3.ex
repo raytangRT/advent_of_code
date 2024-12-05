@@ -1,6 +1,6 @@
 defmodule Day3 do
   require Logger
-  @input_path "./input/day3.txt"
+  @input_path "day3.txt"
   @re ~r/mul\((?<left>\d+),(?<right>\d+)\)/U
   @re_boundary ~r/(don't\(\).*do\(\)|don't\(\).*$)/U
 

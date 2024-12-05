@@ -2,7 +2,7 @@ defmodule AOC do
   require Logger
 
   def read_file(file_path) do
-    Path.expand(file_path)
+    Path.expand(Path.join(["./input", file_path]))
     |> File.stream!([:line])
     |> Stream.map(&String.trim/1)
   end
