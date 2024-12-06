@@ -85,4 +85,61 @@ defmodule Day4 do
       _ -> nil
     end
   end
+
+  # 2050 too high
+  # 139 too low
+  def run2 do
+    map =
+      AOC.read_file("day4.txt")
+      |> Enum.reduce([], fn item, list -> [item | list] end)
+      |> Enum.reverse()
+      |> Enum.map(&String.graphemes/1)
+
+    height = length(map)
+    width = length(Enum.at(map, 0))
+
+    Enum.map(1..(height - 1), fn y ->
+      Enum.map(1..(width - 1), fn x ->
+        cell = value(map, x, y)
+
+        if cell == "A" do
+          top_left = value(map, x - 1, y - 1)
+          bottom_right = value(map, x + 1, y + 1)
+          top_right = value(map, x + 1, y - 1)
+          bottom_left = value(map, x - 1, y + 1)
+
+          cond do
+            is_nil(top_left) ->
+              false
+
+            is_nil(bottom_right) ->
+              false
+
+            is_nil(top_right) ->
+              false
+
+            is_nil(bottom_left) ->
+              false
+
+            (top_left <> bottom_right == "MS" or top_left <> bottom_right == "SM") and
+                (top_right <> bottom_left == "MS" or top_right <> bottom_left == "SM") ->
+              # Logger.info(
+              #   "(#{x}, #{y}) - #{top_left} #{top_right} #{cell} #{bottom_left} #{bottom_right}"
+              # )
+              #
+              {cell, x, y}
+              true
+
+            true ->
+              false
+          end
+        else
+          false
+        end
+      end)
+      |> Enum.reject(&(&1 == false))
+    end)
+    |> Enum.concat()
+    |> Enum.count()
+  end
 end
