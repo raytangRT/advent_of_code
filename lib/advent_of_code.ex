@@ -15,7 +15,11 @@ defmodule AOC do
     end
   end
 
-  def list_to_integer(list) do
+  def parse(str, delim \\ ",") when is_bitstring(str) do
+    str |> String.split(delim) |> Enum.map(&String.to_integer/1)
+  end
+
+  def list_to_integer(list) when is_list(list) do
     Enum.map(list, &String.to_integer/1)
   end
 
