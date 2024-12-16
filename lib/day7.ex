@@ -18,7 +18,7 @@ defmodule Day7 do
     |> Enum.sum()
   end
 
-  def is_valid?(expected_value, numbers, label \\ :start) do
+  def is_valid?(expected_value, numbers, _label \\ :start) do
     # Logger.info("[#{label}||#{expected_value} = #{AOC.list(numbers)}")
 
     cond do

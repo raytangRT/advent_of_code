@@ -48,4 +48,19 @@ defmodule AOC do
   def decreasing?(list) do
     Enum.all?(Enum.zip(list, tl(list)), fn {a, b} -> a > b end)
   end
+
+  def intercept(item) do
+    IO.inspect(item)
+    item
+  end
+
+  def list_to_file(list, file_path) do
+    # Clear file before writing
+    File.write!(file_path, "")
+
+    Enum.each(Enum.with_index(list), fn {item, idx} ->
+      ProgressBar.render(idx, length(list), suffix: :count)
+      File.write!("output.txt", "#{inspect(item)}\n", [:append])
+    end)
+  end
 end
