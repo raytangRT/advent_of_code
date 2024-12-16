@@ -65,6 +65,7 @@ defmodule Day9.Part2 do
                                                         {:file, file_id, file_width}},
                                                        {map, empty_blocks} ->
       ProgressBar.render(end_location - file_location_start, end_location)
+
       empty_slot = look_for_empty_space(empty_blocks, file_location_start, file_width)
 
       if is_nil(empty_slot) do
@@ -107,7 +108,7 @@ defmodule Day9.Part2 do
 
       empty_spaces =
         BiMultiMap.get_keys(empty_blocks, slot_size_to_search)
-        |> Enum.reject(&(&1 > empty_space_before_idx))
+        |> Enum.reject(&(&1 >= empty_space_before_idx))
         |> Enum.sort()
 
       if length(empty_spaces) == 0 do

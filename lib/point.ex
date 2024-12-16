@@ -47,6 +47,12 @@ defmodule Point do
     Point.new(midpoint_x, midpoint_y)
   end
 
+  def move(point, delta) do
+    {x, y} = Point.to_tuple(point)
+    {delta_x, delta_y} = delta
+    Point.new(x + delta_x, y + delta_y)
+  end
+
   def diff(p1, p2) do
     {p1.x - p2.x, p1.y - p2.y}
   end
