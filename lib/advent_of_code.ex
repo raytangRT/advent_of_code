@@ -7,6 +7,11 @@ defmodule AOC do
     |> Stream.map(&String.trim/1)
   end
 
+  def read_file(mode, file_prefix) do
+    file_path = if mode == :actual, do: "#{file_prefix}.txt", else: "#{file_prefix}.sample.txt"
+    read_file(file_path)
+  end
+
   def not_nil_do(input, f) do
     input
     |> case do

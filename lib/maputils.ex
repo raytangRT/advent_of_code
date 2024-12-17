@@ -7,4 +7,13 @@ defmodule MapUtils do
     |> Map.put(key1, value2)
     |> Map.put(key2, value1)
   end
+
+  def get_or_put(map, key, value_fn) do
+    if Map.has_key?(map, key) do
+      {Map.get(map, key), map}
+    else
+      value = value_fn.(key)
+      {value, Map.put(map, key, value)}
+    end
+  end
 end
