@@ -59,6 +59,14 @@ defmodule AOC do
     item
   end
 
+  def intercept(item, f) do
+    if f.(item) do
+      intercept(item)
+    end
+
+    item
+  end
+
   def list_to_file(list, file_path) do
     # Clear file before writing
     File.write!(file_path, "")

@@ -1,10 +1,17 @@
 defmodule Grid do
+  alias Grid.Cell
   require Logger
   defstruct [:width, :height, :cells]
 
-  def parse(file_path, cell_fn) do
+  def identity(_x, _y, value), do: value
+
+  def parse(file_path, cell_fn \\ &identity/3) do
+    new(AOC.read_file(file_path), cell_fn)
+  end
+
+  def new(file_stream, cell_fn \\ &identity/3) do
     cells =
-      AOC.read_file(file_path)
+      file_stream
       |> Enum.with_index()
       |> Enum.map(fn {line, y} ->
         String.graphemes(line)
@@ -27,12 +34,24 @@ defmodule Grid do
     }
   end
 
+  def iterator(%__MODULE__{cells: cells}) do
+    Enum.sort(cells)
+  end
+
   def get_cell(grid, x, y) when is_integer(x) and is_integer(y) do
     get_cell(grid, Point.new(x, y))
   end
 
   def get_cell(grid, point) do
     Map.get(grid.cells, point)
+  end
+
+  def get_cell_value(%__MODULE__{cells: cells}, point) do
+    value = Map.get(cells, point)
+
+    if not is_nil(value) do
+      Cell.value(value)
+    end
   end
 
   def in_bound?(grid, x, y) when is_integer(x) and is_integer(y) do
@@ -43,8 +62,11 @@ defmodule Grid do
     end
   end
 
-  def in_bound?(grid, point) do
-    {x, y} = Point.to_tuple(point)
+  def keys(%__MODULE__{cells: cells}) do
+    Map.keys(cells) |> Enum.sort()
+  end
+
+  def in_bound?(grid, %Point{x: x, y: y}) do
     in_bound?(grid, x, y)
   end
 
@@ -64,7 +86,7 @@ defmodule Grid do
     end)
   end
 
-  def get_cells(grid, filter) do
+  def get_cells(grid, filter \\ & &1) do
     grid.cells
     |> Map.values()
     |> Enum.filter(filter)
@@ -77,9 +99,55 @@ defmodule Grid do
       cells: Map.replace(grid.cells, point, Grid.Cell.new(point, value))
     }
   end
+
+  @top {0, -1}
+  @bottom {0, 1}
+  @left {-1, 0}
+  @right {1, 0}
+  @top_left {-1, -1}
+  @top_right {1, -1}
+  @bottom_right {1, 1}
+  @bottom_left {-1, 1}
+
+  def neighbors(grid, cell, include_diagonals? \\ false) do
+    directions =
+      [@top, @bottom, @left, @right] ++
+        if include_diagonals? do
+          [@top_left, @top_right, @bottom_left, @bottom_right]
+        else
+          []
+        end
+
+    Enum.reduce(directions, [], fn direction, neighbors ->
+      cell = Grid.get_cell(grid, Point.move(cell.point, direction))
+
+      if not is_nil(cell) do
+        [cell | neighbors]
+      else
+        neighbors
+      end
+    end)
+  end
+
+  def neighbors_with_direction(%__MODULE__{} = grid, cell) do
+    move = fn direction ->
+      Grid.get_cell(grid, Point.move(cell.point, direction))
+    end
+
+    Map.new()
+    |> Map.put(:top, move.(@top))
+    |> Map.put(:bottom, move.(@bottom))
+    |> Map.put(:left, move.(@left))
+    |> Map.put(:right, move.(@right))
+    |> Map.put(:top_left, move.(@top_left))
+    |> Map.put(:top_right, move.(@top_right))
+    |> Map.put(:bottom_left, move.(@bottom_left))
+    |> Map.put(:bottom_right, move.(@bottom_right))
+  end
 end
 
 defmodule Grid.Cell do
+  alias Grid.Cell
   defstruct [:point, :value]
 
   defimpl String.Chars, for: Grid.Cell do
@@ -101,4 +169,6 @@ defmodule Grid.Cell do
       value: value
     }
   end
+
+  def value(%Cell{value: value}), do: value
 end

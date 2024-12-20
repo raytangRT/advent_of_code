@@ -7,7 +7,7 @@ defmodule Day11.Part1 do
       result = Map.put(result, idx, splitted_stones)
       {result, splitted_stones}
     end)
-    |> then(fn {result, stone} ->
+    |> then(fn {_result, stone} ->
       stone
     end)
   end

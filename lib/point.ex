@@ -15,14 +15,11 @@ defmodule Point do
     }
   end
 
-  def to_tuple(p) do
-    {p.x, p.y}
+  def string(%__MODULE__{x: x, y: y}) do
+    "(#{x}, #{y})"
   end
 
-  def slope(p1, p2) do
-    {x1, y1} = Point.to_tuple(p1)
-    {x2, y2} = Point.to_tuple(p2)
-
+  def slope(%__MODULE__{x: x1, y: y1}, %__MODULE__{x: x2, y: y2}) do
     if x2 == x1 do
       # Slope is undefined for vertical lines
       :undefined
@@ -31,41 +28,38 @@ defmodule Point do
     end
   end
 
-  def distance(p1, p2) do
-    {x1, y1} = Point.to_tuple(p1)
-    {x2, y2} = Point.to_tuple(p2)
+  def distance(%__MODULE__{x: x1, y: y1}, %__MODULE__{x: x2, y: y2}) do
     :math.sqrt(:math.pow(x2 - x1, 2) + :math.pow(y2 - y1, 2))
   end
 
-  def mid_point(p1, p2) do
-    {x1, y1} = p1
-    {x2, y2} = p2
-
+  def mid_point(%__MODULE__{x: x1, y: y1}, %__MODULE__{x: x2, y: y2}) do
     midpoint_x = x1 + div(x2 - x1, 2)
     midpoint_y = y1 + div(y2 - y1, 2)
 
     Point.new(midpoint_x, midpoint_y)
   end
 
-  def move(point, delta) do
-    {x, y} = Point.to_tuple(point)
+  def move(%__MODULE__{x: x, y: y}, delta) do
     {delta_x, delta_y} = delta
     Point.new(x + delta_x, y + delta_y)
   end
+
+  def move_top(%__MODULE__{x: x, y: y}), do: Point.new(x, y - 1)
+  def move_left(%__MODULE__{x: x, y: y}), do: Point.new(x - 1, y)
+  def move_right(%__MODULE__{x: x, y: y}), do: Point.new(x + 1, y)
+  def move_down(%__MODULE__{x: x, y: y}), do: Point.new(x, y + 1)
 
   def diff(p1, p2) do
     {p1.x - p2.x, p1.y - p2.y}
   end
 
-  def extend(point, delta) do
-    {x, y} = Point.to_tuple(point)
+  def extend(%__MODULE__{x: x, y: y}, delta) do
     {delta_x, delta_y} = delta
 
     [Point.new(x + delta_x, y + delta_y), Point.new(x - delta_x, y - delta_y)]
   end
 
-  def extend(p, slope, distance) do
-    {x0, y0} = Point.to_tuple(p)
+  def extend(%__MODULE__{x: x0, y: y0}, slope, distance) do
     theta = :math.atan(slope)
 
     # Calculate the coordinates of the new points
