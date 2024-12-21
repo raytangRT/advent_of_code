@@ -8,7 +8,18 @@ defmodule Point do
   #   end
   # end
 
-  def new(x, y) do
+  def new(x, y) when is_number(x) and is_number(y) do
+    %__MODULE__{
+      x: round(x),
+      y: round(y)
+    }
+  end
+
+  def new(x, y) when is_bitstring(x) and is_bitstring(y) do
+    new(x |> String.to_integer(), y |> String.to_integer())
+  end
+
+  def new({x, y}) do
     %__MODULE__{
       x: round(x),
       y: round(y)
