@@ -3,7 +3,7 @@ defmodule AOC do
 
   def read_file(file_path) do
     Path.expand(Path.join(["./input", file_path]))
-    |> File.stream!([:line])
+    |> File.stream!()
     |> Stream.map(&String.trim/1)
   end
 

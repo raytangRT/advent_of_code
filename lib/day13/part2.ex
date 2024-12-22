@@ -1,7 +1,6 @@
 defmodule Day13.Part2 do
   require Logger
-  alias Okasaki.Protocols.Deque
-  alias Okasaki.Deque
+
   @re_button ~r"X\+(?<x>\d+).*Y\+(?<y>\d+)"
   @re_prize ~r"X=(?<x>\d+).*Y=(?<y>\d+)"
   # 98958951401151 to high

@@ -5,8 +5,23 @@ defmodule Grid do
 
   def identity(_x, _y, value), do: value
 
-  def parse(file_path, cell_fn \\ &identity/3) do
-    new(AOC.read_file(file_path), cell_fn)
+  def new(width, height, cell_fn) when is_number(width) and is_number(height) do
+    cells =
+      Enum.reduce(0..width, [], fn column_idx, list ->
+        Enum.reduce(0..height, list, fn row_idx, list ->
+          [Cell.new(column_idx, row_idx, cell_fn.(column_idx, row_idx)) | list]
+        end)
+      end)
+
+    %__MODULE__{
+      width: width,
+      height: height,
+      cells:
+        List.flatten(cells)
+        |> Enum.reduce(%{}, fn item, m ->
+          Map.put(m, item.point, item)
+        end)
+    }
   end
 
   def new(file_stream, cell_fn \\ &identity/3) do
@@ -32,6 +47,10 @@ defmodule Grid do
           Map.put(m, item.point, item)
         end)
     }
+  end
+
+  def parse(file_path, cell_fn \\ &identity/3) do
+    new(AOC.read_file(file_path), cell_fn)
   end
 
   def iterator(%__MODULE__{cells: cells}) do
