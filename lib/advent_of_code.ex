@@ -76,4 +76,8 @@ defmodule AOC do
       File.write!("output.txt", "#{inspect(item)}\n", [:append])
     end)
   end
+
+  def clear_terminal do
+    IO.puts(IO.ANSI.clear())
+  end
 end

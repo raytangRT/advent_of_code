@@ -53,6 +53,29 @@ defmodule Grid do
     new(AOC.read_file(file_path), cell_fn)
   end
 
+  def parse_from_list(list, cell_fn \\ &identity/3) do
+    cells =
+      Enum.with_index(list)
+      |> Enum.map(fn {line, y} ->
+        String.graphemes(line)
+        |> Enum.with_index()
+        |> Enum.map(fn {char, x} ->
+          value = cell_fn.(x, y, char)
+          Cell.new(x, y, value)
+        end)
+      end)
+
+    %__MODULE__{
+      width: Enum.count(cells),
+      height: Enum.count(hd(cells)),
+      cells:
+        List.flatten(cells)
+        |> Enum.reduce(%{}, fn item, m ->
+          Map.put(m, item.point, item)
+        end)
+    }
+  end
+
   def iterator(%__MODULE__{cells: cells}) do
     Enum.sort(cells)
   end
@@ -105,6 +128,13 @@ defmodule Grid do
     end)
   end
 
+  def score(grid) do
+    Grid.get_cells(grid, fn cell -> Grid.Cell.value(cell) == :box end)
+    |> Enum.map(fn cell -> Grid.Cell.point(cell) end)
+    |> Enum.map(fn point -> point.y * 100 + point.x end)
+    |> Enum.sum()
+  end
+
   def get_cells(grid, filter \\ & &1) do
     grid.cells
     |> Map.values()
@@ -117,6 +147,14 @@ defmodule Grid do
       height: grid.height,
       cells: Map.replace(grid.cells, point, Grid.Cell.new(point, value))
     }
+  end
+
+  def swap(grid, %Point{} = point1, %Point{} = point2) do
+    point1_value = Grid.get_cell_value(grid, point1)
+    point2_value = Grid.get_cell_value(grid, point2)
+
+    replace(grid, point1, point2_value)
+    |> replace(point2, point1_value)
   end
 
   @top {0, -1}
@@ -190,4 +228,6 @@ defmodule Grid.Cell do
   end
 
   def value(%Cell{value: value}), do: value
+  def point(%Cell{point: point}), do: point
+  def decompose(%Cell{point: point, value: value}), do: {point, value}
 end
