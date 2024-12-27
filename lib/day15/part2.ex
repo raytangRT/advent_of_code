@@ -5,7 +5,7 @@ defmodule Day15.Part2 do
   def run(mode \\ :sample) do
     {grid, movements} = read(mode)
 
-    {grid, grids} = walk(grid, movements)
+    {grid, _grids} = walk(grid, movements)
     score(grid)
   end
 

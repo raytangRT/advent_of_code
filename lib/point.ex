@@ -2,6 +2,7 @@ defmodule Point do
   require Logger
   defstruct [:x, :y]
 
+  @type t :: %__MODULE__{x: Integer.t(), y: Integer.t()}
   # defimpl String.Chars, for: Point do
   #   def to_string(point) do
   #     "Point(#{point.x}, #{point.y})"

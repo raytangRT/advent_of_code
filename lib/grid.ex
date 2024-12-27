@@ -1,7 +1,36 @@
+defmodule Grid.Cell do
+  use TypedStruct
+
+  typedstruct enforced: true do
+    field(:point, Point.t())
+    field(:value, term())
+  end
+
+  def new(point, value) do
+    %__MODULE__{
+      point: point,
+      value: value
+    }
+  end
+
+  def new(x, y, value) do
+    %__MODULE__{
+      point: Point.new(x, y),
+      value: value
+    }
+  end
+
+  def value(%__MODULE__{value: value}), do: value
+  def point(%__MODULE__{point: point}), do: point
+  def decompose(%__MODULE__{point: point, value: value}), do: {point, value}
+end
+
 defmodule Grid do
   alias Grid.Cell
   require Logger
   defstruct [:width, :height, :cells]
+
+  @type t :: %__MODULE__{cells: %{Point.t() => Cell.t()}}
 
   def identity(_x, _y, value), do: value
 
@@ -112,29 +141,37 @@ defmodule Grid do
     in_bound?(grid, x, y)
   end
 
-  def print(grid, cell_fn) do
-    Map.keys(grid.cells)
+  defp prepare_content(%Grid{cells: cells}, cell_fn) do
+    Map.keys(cells)
     |> Enum.sort_by(fn p -> {p.y, p.x} end)
     |> Enum.chunk_by(fn p -> p.y end)
     ## a list of list with x sorted
-    |> Enum.each(fn list ->
-      Enum.map(list, fn item ->
-        cell = Map.get(grid.cells, item)
+    |> Enum.reduce([], fn list, output ->
+      line =
+        Enum.map(list, fn item ->
+          cell = Map.get(cells, item)
 
-        cell_fn.(cell)
-      end)
-      |> Enum.reduce("", fn item, str -> str <> item end)
-      |> IO.puts()
+          cell_fn.(cell)
+        end)
+        |> Enum.reduce("", fn item, str -> str <> item end)
+
+      [line | output]
     end)
+    |> Enum.reverse()
+    |> Enum.join("\r\n")
   end
 
-  def score(grid) do
-    Grid.get_cells(grid, fn cell -> Grid.Cell.value(cell) == :box end)
-    |> Enum.map(fn cell -> Grid.Cell.point(cell) end)
-    |> Enum.map(fn point -> point.y * 100 + point.x end)
-    |> Enum.sum()
+  def print_to_file(%__MODULE__{} = grid, file_name, cell_fn) do
+    content = prepare_content(grid, cell_fn)
+
+    File.write!(file_name, content)
   end
 
+  def print(grid, cell_fn) do
+    prepare_content(grid, cell_fn) |> IO.puts()
+  end
+
+  @spec get_cells(Grid.t(), (Cell.t() -> boolean)) :: [Cell.t()]
   def get_cells(grid, filter \\ & &1) do
     grid.cells
     |> Map.values()
@@ -166,10 +203,13 @@ defmodule Grid do
   @bottom_right {1, 1}
   @bottom_left {-1, 1}
 
-  def neighbors(grid, cell, include_diagonals? \\ false) do
+  @direction_map %{up: {0, -1}, down: {0, 1}, left: {-1, 0}, right: {1, 0}}
+  def neighbors(grid, cell, opt)
+
+  def neighbors(grid, cell, opt) when is_boolean(opt) do
     directions =
       [@top, @bottom, @left, @right] ++
-        if include_diagonals? do
+        if opt do
           [@top_left, @top_right, @bottom_left, @bottom_right]
         else
           []
@@ -184,6 +224,16 @@ defmodule Grid do
         neighbors
       end
     end)
+  end
+
+  def get_neighbors(%__MODULE__{} = grid, cell, directions) when is_list(directions) do
+    Enum.map(directions, fn direction ->
+      {direction, Grid.get_cell(grid, move_point(cell, direction))}
+    end)
+  end
+
+  defp move_point(%Cell{point: point}, direction) do
+    Point.move(point, Map.get(@direction_map, direction))
   end
 
   def neighbors_with_direction(%__MODULE__{} = grid, cell) do
@@ -201,33 +251,4 @@ defmodule Grid do
     |> Map.put(:bottom_left, move.(@bottom_left))
     |> Map.put(:bottom_right, move.(@bottom_right))
   end
-end
-
-defmodule Grid.Cell do
-  alias Grid.Cell
-  defstruct [:point, :value]
-
-  defimpl String.Chars, for: Grid.Cell do
-    def to_string(cell) do
-      "Cell(#{cell.point}), value = #{inspect(cell.value)}"
-    end
-  end
-
-  def new(point, value) do
-    %__MODULE__{
-      point: point,
-      value: value
-    }
-  end
-
-  def new(x, y, value) do
-    %__MODULE__{
-      point: Point.new(x, y),
-      value: value
-    }
-  end
-
-  def value(%Cell{value: value}), do: value
-  def point(%Cell{point: point}), do: point
-  def decompose(%Cell{point: point, value: value}), do: {point, value}
 end

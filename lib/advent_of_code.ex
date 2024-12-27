@@ -55,7 +55,7 @@ defmodule AOC do
   end
 
   def intercept(item) do
-    IO.inspect(item)
+    Logger.info("#{inspect(item)}")
     item
   end
 
@@ -79,5 +79,34 @@ defmodule AOC do
 
   def clear_terminal do
     IO.puts(IO.ANSI.clear())
+  end
+end
+
+defmodule AOC.Text do
+  import IO.ANSI
+
+  def yellow(text) do
+    yellow() <> text <> reset()
+  end
+
+  def red(text) do
+    red() <> text <> reset()
+  end
+
+  def red(text, intensity) do
+    color = "\e[38;2;#{rem(intensity, 255)};0;0m"
+    color <> text <> reset()
+  end
+
+  def blue(text) do
+    blue() <> text <> reset()
+  end
+
+  def green(text) do
+    green() <> text <> reset()
+  end
+
+  def black(text) do
+    black() <> text <> reset()
   end
 end

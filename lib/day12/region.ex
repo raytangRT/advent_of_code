@@ -19,7 +19,7 @@ defmodule Day12.Region do
       cell = Grid.get_cell(grid, plot.point)
 
       neighbor_count =
-        Grid.neighbors(grid, cell)
+        Grid.neighbors(grid, cell, false)
         |> Enum.map(&Grid.Cell.value/1)
         |> Enum.map(&elem(&1, 1))
         |> Enum.count(&(&1.value == plot.value))
