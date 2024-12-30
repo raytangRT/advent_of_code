@@ -56,6 +56,7 @@ defmodule Point do
     Point.new(x + delta_x, y + delta_y)
   end
 
+  def move_up(%__MODULE__{} = point), do: move_top(point)
   def move_top(%__MODULE__{x: x, y: y}), do: Point.new(x, y - 1)
   def move_left(%__MODULE__{x: x, y: y}), do: Point.new(x - 1, y)
   def move_right(%__MODULE__{x: x, y: y}), do: Point.new(x + 1, y)
