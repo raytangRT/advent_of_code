@@ -80,6 +80,9 @@ defmodule AOC do
   def clear_terminal do
     IO.puts(IO.ANSI.clear())
   end
+
+  def if_nil(value, default) when is_nil(value), do: default
+  def if_nil(value, _default), do: value
 end
 
 defmodule AOC.Text do

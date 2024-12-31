@@ -18,4 +18,6 @@ defmodule MapUtils do
   end
 
   def put(map, {key, value}), do: Map.put(map, key, value)
+
+  def put(map, [key, value]), do: Map.put(map, key, value)
 end
