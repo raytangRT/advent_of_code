@@ -1,90 +1,53 @@
 defmodule Day17.Part2 do
   require Logger
   import Day17.Part1
-  import Bitwise
 
   @program [2, 4, 1, 7, 7, 5, 0, 3, 4, 0, 1, 7, 5, 5, 3, 0]
-  @start_pnt 0o7777770000000000
-  @end_point 0o7777777700000000
-  def run() do
-    expected_result = Enum.join(@program, ",")
 
-    Enum.reduce_while(
-      0o66160527..0o7777777777,
-      0,
-      fn v, _ ->
-        actual_result = op(v)
+  def guess() do
+    programs = Enum.reverse(@program) |> Enum.map(&Integer.to_string/1)
 
-        if actual_result |> String.starts_with?("0,3,4,0,1,7,5,5,3,0") do
-          IO.puts("[#{v}] [#{Integer.to_string(v, 8)}] = #{inspect(actual_result)}")
-        end
-
-        if actual_result == expected_result do
-          {:halt, v}
-        else
-          {:cont, 0}
-        end
-      end
-    )
-  end
-
-  def op(value, program \\ @program) do
-    registers = %{A: value}
-    {_, output} = operate(registers, program)
-    output
-  end
-
-  def oct(input) when input < 8 do
-    [0, input]
-  end
-
-  def oct(input) do
-    num = Integer.to_string(input, 8)
-
-    String.split_at(num, -1)
-    |> Tuple.to_list()
+    guess_recursively("", programs)
+    |> List.flatten()
+    |> Enum.sort()
     |> Enum.map(&String.to_integer(&1, 8))
   end
 
-  def act(ans, list \\ []) do
-    [a1, d0] = oct(ans)
-    c1 = ans >>> (7 - d0)
-    res = bxor(c1, d0) |> band(7)
-    list = [res |> Integer.to_string() | list]
-
-    if a1 > 0 do
-      act(a1, list)
-    else
-      list
-    end
+  defp op(value) do
+    registers = %{A: value}
+    {_, output} = operate(registers, @program)
+    output
   end
 
-  # kind of brute force
-  def loop_guest() do
-    guess = "726011052262"
+  defp start_guessing(guess, expected) do
+    starting_point = (guess <> "0") |> Integer.parse(8) |> elem(0)
+    ending_point = (guess <> "7") |> Integer.parse(8) |> elem(0)
 
-    start_point =
-      (guess <> "0000") |> Integer.parse(8) |> elem(0)
-
-    end_point =
-      (guess <> "7777") |> Integer.parse(8) |> elem(0)
-
-    Enum.reduce_while(start_point..end_point, 0, fn input, _ ->
-      ProgressBar.render(input, end_point, suffix: :count)
+    Enum.map(starting_point..ending_point, fn input ->
       result = op(input)
 
-      if String.ends_with?(result, "2,4,1,7,7,5,0,3,4,0,1,7,5,5,3,0") do
-        IO.puts("#{input |> Integer.to_string(8)}, #{result}")
+      if String.ends_with?(result, expected) do
+        input |> Integer.to_string(8)
+      else
+        nil
       end
-
-      {:cont, 0}
     end)
+    |> Enum.reject(&is_nil/1)
   end
 
-  def guest(output, k) do
-    for idx <- 0..7 do
-      value = (output + 8 * k) |> bxor(idx) <<< (7 - idx)
-      {idx, value, op(value)}
-    end
+  defp guess_recursively(v, list, expected \\ "")
+
+  defp guess_recursively(v, list, _expected) when length(list) == 0 do
+    v
+  end
+
+  defp guess_recursively(v, [head | tail], expected) do
+    new_expected =
+      if String.length(expected) > 0, do: [head, expected] |> Enum.join(","), else: head
+
+    start_guessing(v, new_expected)
+    |> Enum.map(fn next ->
+      guess_recursively(next, tail, new_expected)
+    end)
   end
 end
