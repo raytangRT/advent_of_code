@@ -16,4 +16,15 @@ defmodule ListUtils do
     [last | middle] = Enum.reverse(rest)
     {first, Enum.reverse(middle), last}
   end
+
+  def remove_by_value(list, target) do
+    idx = Enum.find_index(list, &(&1 == target))
+
+    if is_nil(idx) do
+      {:no_change, list}
+    else
+      {front, [_ | rest]} = Enum.split(list, idx)
+      {:ok, {front, rest}}
+    end
+  end
 end

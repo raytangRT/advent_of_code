@@ -83,6 +83,10 @@ defmodule AOC do
 
   def if_nil(value, default) when is_nil(value), do: default
   def if_nil(value, _default), do: value
+
+  def f1(input), do: fn _ -> input end
+  def f2(input), do: fn _, _ -> input end
+  def f3(input), do: fn _, _, _ -> input end
 end
 
 defmodule AOC.Text do

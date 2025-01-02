@@ -9,6 +9,12 @@ defmodule Point do
   #   end
   # end
 
+  defimpl String.Chars, for: Point do
+    def to_string(%Point{x: x, y: y}) do
+      "#{x}#{y}"
+    end
+  end
+
   def new(x, y) when is_number(x) and is_number(y) do
     %__MODULE__{
       x: round(x),
@@ -20,7 +26,11 @@ defmodule Point do
     new(x |> String.to_integer(), y |> String.to_integer())
   end
 
-  def new({x, y}) do
+  def new({x, y}) when is_bitstring(x) and is_bitstring(y) do
+    new(String.to_integer(x), String.to_integer(y))
+  end
+
+  def new({x, y}) when is_integer(x) and is_integer(y) do
     %__MODULE__{
       x: round(x),
       y: round(y)

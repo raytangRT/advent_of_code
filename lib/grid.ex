@@ -105,6 +105,8 @@ defmodule Grid do
     }
   end
 
+  def no_of_cells(%__MODULE__{width: width, height: height}), do: width * height
+
   def iterator(%__MODULE__{cells: cells}) do
     Enum.sort(cells)
   end
