@@ -7,11 +7,14 @@ defmodule Maze do
   @wall_tag :wall
   @slot_tag :slot
   @path_tag :path
+  @start_path_tag :start_path
+  @end_path_tag :end_path
 
   @spec new(%Grid{}, (Cell.t() -> :start | :end | :wall | :slot)) :: any()
   def new(%Grid{} = grid, cell_type_fn) do
     starting = get_cell(grid, cell_type_fn, @start_tag)
     graph = build_graph(Graph.new(), grid, cell_type_fn, [starting], MapSet.new())
+    IO.puts("")
 
     %__MODULE__{
       graph: graph,
@@ -20,14 +23,24 @@ defmodule Maze do
     }
   end
 
-  def print(%Maze{grid: grid}, path \\ []) do
-    grid = if path != [], do: overlay(grid, path), else: grid
+  def print(%Maze{grid: grid, cell_type_fn: cell_type_fn}, path \\ []) do
+    grid = if path != [], do: overlay(grid, cell_type_fn, path), else: grid
     print_grid(grid)
   end
 
-  defp overlay(grid, path) do
+  defp overlay(grid, cell_type_fn, path) do
+    startting_point = get_cell(grid, cell_type_fn, :start) |> Cell.point()
+    ending_point = get_cell(grid, cell_type_fn, :end) |> Cell.point()
+
     Enum.reduce(path, grid, fn point, grid ->
-      Grid.replace(grid, point, :path)
+      tag =
+        cond do
+          point == startting_point -> @start_path_tag
+          point == ending_point -> @end_path_tag
+          true -> @path_tag
+        end
+
+      Grid.replace(grid, point, tag)
     end)
   end
 
@@ -36,9 +49,11 @@ defmodule Maze do
       case type do
         @start_tag -> "S"
         @end_tag -> "E"
-        @wall_tag -> "W"
+        @wall_tag -> "#"
         @slot_tag -> "."
         @path_tag -> "O" |> AOC.Text.yellow()
+        @start_path_tag -> "S" |> AOC.Text.blue()
+        @end_path_tag -> "E" |> AOC.Text.blue()
       end
     end)
   end
@@ -106,6 +121,31 @@ defmodule Maze do
     %Maze{
       graph: graph,
       cell_type_fn: maze.cell_type_fn,
+      grid: grid
+    }
+  end
+
+  def remove_wall(
+        %Maze{graph: graph, grid: grid, cell_type_fn: cell_type_fn},
+        %Point{} = point,
+        slot_value_fn \\ AOC.f1(:slot)
+      ) do
+    new_slot_cell_value = slot_value_fn.(Grid.get_cell(grid, point))
+    grid = Grid.replace(grid, point, new_slot_cell_value)
+
+    graph =
+      Grid.get_neighbors(grid, Grid.get_cell(grid, point), [:up, :down, :left, :right])
+      |> Enum.reject(fn {_, %Cell{} = cell} ->
+        cell_type_fn.(cell) == :wall
+      end)
+      |> Enum.reduce(graph, fn {_, %Cell{point: from_point}}, graph ->
+        Graph.add_edge(graph, from_point, point)
+        |> Graph.add_edge(point, from_point)
+      end)
+
+    %Maze{
+      graph: graph,
+      cell_type_fn: cell_type_fn,
       grid: grid
     }
   end
