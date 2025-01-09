@@ -74,4 +74,10 @@ defmodule ListUtils do
   end
 
   defp clean_element(other), do: other
+
+  def pop_front_and_last([head | tail] = list) when is_list(list) do
+    {last, modified_tail} = List.pop_at(tail, -1)
+
+    {head, modified_tail, last}
+  end
 end

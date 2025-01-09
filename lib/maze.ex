@@ -9,6 +9,7 @@ defmodule Maze do
   @path_tag :path
   @start_path_tag :start_path
   @end_path_tag :end_path
+  @label_point_tag :label_point
 
   @spec new(%Grid{}, (Cell.t() -> :start | :end | :wall | :slot)) :: any()
   def new(%Grid{} = grid, cell_type_fn) do
@@ -54,8 +55,19 @@ defmodule Maze do
         @path_tag -> "O" |> AOC.Text.yellow()
         @start_path_tag -> "S" |> AOC.Text.blue()
         @end_path_tag -> "E" |> AOC.Text.blue()
+        @label_point_tag -> "X" |> AOC.Text.red()
       end
     end)
+  end
+
+  def label_point(%Maze{grid: grid} = maze, %Point{} = point) do
+    grid = Grid.replace(grid, point, @label_point_tag)
+
+    %Maze{
+      grid: grid,
+      cell_type_fn: maze.cell_type_fn,
+      graph: maze.graph
+    }
   end
 
   def get_cell(%__MODULE__{grid: grid, cell_type_fn: cell_type_fn}, type) do
@@ -63,10 +75,16 @@ defmodule Maze do
   end
 
   defp get_cell(%Grid{} = grid, cell_type_fn, type) do
-    Grid.get_cells(grid, fn %Cell{} = cell ->
-      cell_type_fn.(cell) == type
-    end)
-    |> hd()
+    cells =
+      Grid.get_cells(grid, fn %Cell{} = cell ->
+        cell_type_fn.(cell) == type
+      end)
+
+    if cells == [] do
+      []
+    else
+      hd(cells)
+    end
   end
 
   defp build_graph(graph, _grid, _cell_type_fn, next_cells, _visited) when next_cells == [] do
@@ -107,8 +125,20 @@ defmodule Maze do
     end)
   end
 
-  def dijkstra(%Maze{graph: graph} = maze) do
-    starting_point = get_cell(maze, @start_tag) |> Cell.point()
+  def is_point_in_board?(%Maze{grid: grid}, %Point{} = point) do
+    Grid.in_bound?(grid, point)
+  end
+
+  def dijkstra(%Maze{graph: graph} = maze, from \\ nil) do
+    if is_nil(from) do
+      IO.puts("nil from found")
+    end
+
+    starting_point =
+      AOC.if_nil(from, fn ->
+        get_cell(maze, @start_tag) |> Cell.point()
+      end)
+
     ending_point = get_cell(maze, @end_tag) |> Cell.point()
     Graph.dijkstra(graph, starting_point, ending_point)
   end
@@ -126,27 +156,32 @@ defmodule Maze do
   end
 
   def remove_wall(
-        %Maze{graph: graph, grid: grid, cell_type_fn: cell_type_fn},
+        %Maze{graph: graph, grid: grid, cell_type_fn: cell_type_fn} = maze,
         %Point{} = point,
         slot_value_fn \\ AOC.f1(:slot)
       ) do
-    new_slot_cell_value = slot_value_fn.(Grid.get_cell(grid, point))
-    grid = Grid.replace(grid, point, new_slot_cell_value)
+    if Maze.get_cell(maze, @end_tag) |> Cell.point() == point do
+      maze
+    else
+      new_slot_cell_value = slot_value_fn.(Grid.get_cell(grid, point))
+      grid = Grid.replace(grid, point, new_slot_cell_value)
 
-    graph =
-      Grid.get_neighbors(grid, Grid.get_cell(grid, point), [:up, :down, :left, :right])
-      |> Enum.reject(fn {_, %Cell{} = cell} ->
-        cell_type_fn.(cell) == :wall
-      end)
-      |> Enum.reduce(graph, fn {_, %Cell{point: from_point}}, graph ->
-        Graph.add_edge(graph, from_point, point)
-        |> Graph.add_edge(point, from_point)
-      end)
+      graph =
+        Grid.get_neighbors(grid, Grid.get_cell(grid, point), [:up, :down, :left, :right])
+        |> Enum.reject(fn {_, cell} -> is_nil(cell) end)
+        |> Enum.reject(fn {_, %Cell{} = cell} ->
+          cell_type_fn.(cell) == :wall
+        end)
+        |> Enum.reduce(graph, fn {_, %Cell{point: from_point}}, graph ->
+          Graph.add_edge(graph, from_point, point)
+          |> Graph.add_edge(point, from_point)
+        end)
 
-    %Maze{
-      graph: graph,
-      cell_type_fn: cell_type_fn,
-      grid: grid
-    }
+      %Maze{
+        graph: graph,
+        cell_type_fn: cell_type_fn,
+        grid: grid
+      }
+    end
   end
 end

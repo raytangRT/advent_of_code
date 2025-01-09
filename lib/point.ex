@@ -54,6 +54,10 @@ defmodule Point do
     :math.sqrt(:math.pow(x2 - x1, 2) + :math.pow(y2 - y1, 2))
   end
 
+  def distance_manhattan(%Point{x: x1, y: y1}, %Point{x: x2, y: y2}) do
+    abs(x1 - x2) + abs(y1 - y2)
+  end
+
   def mid_point(%__MODULE__{x: x1, y: y1}, %__MODULE__{x: x2, y: y2}) do
     midpoint_x = x1 + div(x2 - x1, 2)
     midpoint_y = y1 + div(y2 - y1, 2)

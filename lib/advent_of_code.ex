@@ -81,7 +81,12 @@ defmodule AOC do
     IO.puts(IO.ANSI.clear())
   end
 
-  def if_nil(value, default) when is_nil(value), do: default
+  def if_nil(value, default) when is_nil(value) and not is_function(default), do: default
+
+  def if_nil(value, default_fn) when is_nil(value) and is_function(default_fn) do
+    default_fn.()
+  end
+
   def if_nil(value, _default), do: value
 
   def f1(input), do: fn _ -> input end
