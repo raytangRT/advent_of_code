@@ -28,15 +28,21 @@ defmodule ListUtils do
     end
   end
 
-  def flatten(list, result) when list == [], do: result
+  def flatten(list) do
+    flatten_inner(list)
+    |> MapSet.to_list()
+  end
 
-  def flatten([h | _r] = list, result) when is_list(list) and is_list(h) do
+  defp flatten_inner(list, result \\ MapSet.new())
+  defp flatten_inner(list, result) when list == [], do: result
+
+  defp flatten_inner([h | _r] = list, result) when is_list(list) and is_list(h) do
     Enum.reduce(list, result, fn nested_list, result ->
-      flatten(nested_list, result)
+      flatten_inner(nested_list, result)
     end)
   end
 
-  def flatten([h | _r] = list, result) when is_list(list) and not is_list(h) do
+  defp flatten_inner([h | _r] = list, result) when is_list(list) and not is_list(h) do
     MapSet.put(result, list)
   end
 

@@ -97,4 +97,14 @@ defmodule Point do
     y2 = y0 - distance * :math.sin(theta)
     [Point.new(x1, y1), Point.new(x2, y2)]
   end
+
+  def relative_to(point_a, point_b) do
+    cond do
+      move_up(point_a) == point_b -> :up
+      move_down(point_a) == point_b -> :down
+      move_left(point_a) == point_b -> :left
+      move_right(point_a) == point_b -> :right
+      true -> raise("not neighbor")
+    end
+  end
 end

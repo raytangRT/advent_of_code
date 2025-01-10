@@ -53,7 +53,34 @@ defmodule Grid do
     }
   end
 
-  def new(file_stream, cell_fn \\ &identity/3) do
+  def new(input, cell_fn \\ &identity/3)
+
+  def new(values, cell_fn) when is_list(values) do
+    cells =
+      values
+      |> Enum.with_index()
+      |> Enum.map(fn {rows, y} ->
+        rows
+        |> Enum.with_index()
+        |> Enum.map(fn {v, x} ->
+          value = cell_fn.(x, y, v)
+          Grid.Cell.new(x, y, value)
+        end)
+      end)
+
+    %__MODULE__{
+      width: Enum.count(cells),
+      height: Enum.count(hd(cells)),
+      cells:
+        cells
+        |> List.flatten()
+        |> Enum.reduce(%{}, fn item, m ->
+          Map.put(m, item.point, item)
+        end)
+    }
+  end
+
+  def new(file_stream, cell_fn) do
     cells =
       file_stream
       |> Enum.with_index()

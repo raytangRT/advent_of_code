@@ -59,11 +59,8 @@ defmodule AOC do
     item
   end
 
-  def intercept(item, f) do
-    if f.(item) do
-      intercept(item)
-    end
-
+  def intercept(item, format_fn) when is_function(format_fn) do
+    Logger.info(format_fn.(item))
     item
   end
 
