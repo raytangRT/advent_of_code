@@ -1,6 +1,20 @@
 defmodule Day24.Part2 do
   @re ~r"(?<lhs>\w+) (?<op>\w+) (?<rhs>\w+) -> (?<output>\w+)"
 
+  def replace(ops, key, values) when is_list(values) do
+    ops = BiMultiMap.delete_key(ops, key)
+
+    Enum.map(values, &{key, &1})
+    |> Enum.reduce(ops, fn input, ops ->
+      BiMultiMap.put(ops, input)
+    end)
+  end
+
+  def replace(ops, key, value) do
+    BiMultiMap.delete_key(ops, key)
+    |> BiMultiMap.put(key, value)
+  end
+
   def run() do
     {map, ops} = read()
 
@@ -8,7 +22,19 @@ defmodule Day24.Part2 do
       (get(map, "x") + get(map, "y"))
       |> Integer.to_string(2)
 
-    IO.puts(expected_result |> String.graphemes() |> Enum.join("||"))
+    ops =
+      ops
+
+      # swapping z09 and gwh
+      |> replace({"mnm", "gqb"}, {&Bitwise.bxor/2, "z09"})
+      |> replace({"dsk", "ptc"}, {&Bitwise.bor/2, "gwh"})
+      # swapping wbw and wgb
+      |> replace({"y13", "x13"}, [{&Bitwise.bxor/2, "wbw"}, {&Bitwise.band/2, "wgb"}])
+      # swaping rcb and z21
+      |> replace({"kgk", "sbs"}, [{&Bitwise.band/2, "rcb"}, {&Bitwise.bxor/2, "z21"}])
+      # swaping z39 and jct
+      |> replace({"wjf", "ksf"}, {&Bitwise.bxor/2, "z39"})
+      |> replace({"x39", "y39"}, [{&:erlang.band/2, "jct"}, {&:erlang.bxor/2, "ksf"}])
 
     processed_map =
       Day24.Part1.do_work(map, ops)
@@ -23,38 +49,21 @@ defmodule Day24.Part2 do
         r <> Integer.to_string(v)
       end)
 
-    IO.puts(actaul_result |> String.graphemes() |> Enum.join("||"))
-    graph = graphify(ops)
-
-    expected_result
-    |> Integer.parse(2)
-    |> elem(0)
-    |> Integer.to_string(2)
-    |> String.graphemes()
-    |> Enum.join("||")
-    |> IO.puts()
-
     Bitwise.bxor(
       expected_result |> Integer.parse(2) |> elem(0),
       actaul_result |> Integer.parse(2) |> elem(0)
     )
     |> Integer.to_string(2)
+    |> String.pad_leading(String.length(expected_result), "0")
     |> String.graphemes()
     |> Enum.reverse()
     |> Enum.with_index()
-    |> Enum.reduce([], fn {v, idx}, result ->
-      if v == "0" do
-        result
-      else
-        vertex = "z#{String.pad_leading(Integer.to_string(idx), 2, "0")}"
-        expected_bit = if Map.get(processed_map, vertex) == 0, do: 1, else: 0
-        [{vertex, expected_bit} | result]
+    |> Enum.map(fn {v, idx} ->
+      if v == "1" do
+        "z#{String.pad_leading(Integer.to_string(idx), 2, "0")}"
       end
     end)
-    |> Enum.map(fn {vertex, expected_bit} ->
-      IO.puts("checking #{vertex}, #{expected_bit}")
-      {vertex, check(graph, processed_map, vertex, expected_bit)}
-    end)
+    |> Enum.reject(&is_nil/1)
   end
 
   def get(map, start_with) do
@@ -190,6 +199,9 @@ defmodule Day24.Part2 do
     cond do
       expected_bit == 1 and left_value == 0 and right_value == 0 ->
         IO.puts("\texpected_bit == 1 and left_value == 0 and right_value == 0 ->")
+        case1 = {check(graph, map, left_vertex, 1), check(graph, map, right_vertex, 0)}
+        case2 = {check(graph, map, left_vertex, 0), check(graph, map, right_vertex, 1)}
+        IO.puts("#{inspect(case1)} OR #{inspect(case2)}")
         {:either_xor_true, [left_vertex, right_vertex]}
 
       expected_bit == 1 ->
@@ -204,7 +216,6 @@ defmodule Day24.Part2 do
         IO.puts("\tleft_value == 0 and right_value == 1 ->")
         left_is_safe = check(graph, map, left_vertex, 1)
         right_is_safe = check(graph, map, right_vertex, 0)
-        IO.inspect(left_is_safe)
 
         cond do
           not is_boolean(left_is_safe) ->
@@ -217,5 +228,27 @@ defmodule Day24.Part2 do
             nil
         end
     end
+  end
+
+  def is_valid_full_adder?(graph, x, y, r) do
+    {left_xor, left_and} = is_valid_input_vertex?(graph, x)
+    {right_xor, right_and} = is_valid_input_vertex?(graph, y)
+
+    if left_xor == right_xor and left_and == right_and do
+      {or_vertx} = is_valid_carry_vertex?(graph, left_and)
+      IO.puts("#{left_xor} || #{left_and} || #{or_vertx}")
+    end
+  end
+
+  def is_valid_input_vertex?(graph, vertex) do
+    [%Graph.Edge{v2: xor_vertex, label: "XOR"}, %Graph.Edge{v2: and_vertex, label: "AND"}] =
+      Graph.out_edges(graph, vertex)
+
+    {xor_vertex, and_vertex}
+  end
+
+  def is_valid_carry_vertex?(graph, vertex) do
+    [%Graph.Edge{v2: or_vertex, label: "OR"}] = Graph.out_edges(graph, vertex)
+    {or_vertex}
   end
 end

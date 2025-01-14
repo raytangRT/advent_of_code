@@ -49,6 +49,10 @@ defmodule Day24.Part1 do
   def do_work(map, ops) do
     keys = find_next(map, ops)
 
+    if keys == [] and BiMultiMap.size(ops) > 0 do
+      raise "Empty keys while non-empty ops"
+    end
+
     {map, ops} =
       Enum.reduce(keys, {map, ops}, fn {lhs, rhs} = key, {map, ops} ->
         result =
