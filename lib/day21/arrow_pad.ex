@@ -28,22 +28,29 @@ defmodule Day21.ArrowPad do
     paths = Graph.Pathfinding.all(@arrow_pad, from, to)
 
     min_length =
-      Enum.reduce(paths, :inf, fn path, min_length ->
-        if length(path) < min_length do
-          length(path)
-        else
-          min_length
-        end
+      Enum.min_by(paths, &length/1)
+
+    directional_paths =
+      Enum.reject(paths, &(length(&1) > min_length))
+      |> Enum.map(fn path ->
+        Enum.chunk_every(path, 2, 1, :discard)
+        |> Enum.map(fn [from, to] ->
+          from = BiMap.get(@arrow_keys_map, from)
+          to = BiMap.get(@arrow_keys_map, to)
+          Point.relative_to(from, to)
+        end)
       end)
 
-    Enum.reject(paths, &(length(&1) > min_length))
-    |> Enum.map(fn path ->
-      Enum.chunk_every(path, 2, 1, :discard)
-      |> Enum.map(fn [from, to] ->
-        from = BiMap.get(@arrow_keys_map, from)
-        to = BiMap.get(@arrow_keys_map, to)
-        Point.relative_to(from, to)
-      end)
+    min_score =
+      Enum.min_by(directional_paths, &score_path/1)
+
+    Enum.filter(directional_paths, &(score_path(&1) <= min_score))
+  end
+
+  def score_path(path) do
+    Enum.chunk_every(path, 2, 1, :discard)
+    |> Enum.reduce(0, fn [left, right], score ->
+      if left == right, do: score, else: score + 100
     end)
   end
 

@@ -40,24 +40,40 @@ defmodule Day21.Numpad do
 
   def get_numpad_paths(from, to) do
     paths = Graph.Pathfinding.all(@numpad, from, to)
+    [head | rest] = paths
 
     min_length =
-      Enum.reduce(paths, :inf, fn path, min_length ->
-        if length(path) < min_length do
-          length(path)
-        else
-          min_length
-        end
+      Enum.reduce(rest, length(head), fn path, min_length ->
+        min(min_length, length(path))
       end)
 
-    Enum.reject(paths, &(length(&1) > min_length))
-    |> Enum.map(fn path ->
-      Enum.chunk_every(path, 2, 1, :discard)
-      |> Enum.map(fn [from, to] ->
-        from = Map.get(@numpad_map, from)
-        to = Map.get(@numpad_map, to)
-        Point.relative_to(from, to)
+    [head | rest] =
+      directional_paths =
+      Enum.filter(paths, fn path ->
+        length(path) <= min_length
       end)
+      |> Enum.map(fn path ->
+        Enum.chunk_every(path, 2, 1, :discard)
+        |> Enum.map(fn [from, to] ->
+          from = Map.get(@numpad_map, from)
+          to = Map.get(@numpad_map, to)
+          Point.relative_to(from, to)
+        end)
+      end)
+
+    min_score =
+      Enum.reduce(rest, score_path(head), fn path, score ->
+        min(score, score_path(path))
+      end)
+
+    directional_paths
+    # directional_paths |> Enum.filter(fn path -> score_path(path) == min_score end)
+  end
+
+  def score_path(path) do
+    Enum.chunk_every(path, 2, 1, :discard)
+    |> Enum.reduce(0, fn [left, right], score ->
+      if left == right, do: score, else: score + 100
     end)
   end
 

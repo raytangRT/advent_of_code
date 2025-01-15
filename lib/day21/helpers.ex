@@ -7,7 +7,6 @@ defmodule Day21.Helpers do
     |> Enum.map(fn path ->
       path ++ [:press]
     end)
-    |> AOC.intercept()
   end
 
   def get_arrowpad_paths(from, to), do: Map.get(@arrowpad_paths, {from, to})
