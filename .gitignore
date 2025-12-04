@@ -9,3 +9,7 @@ erl_crash.dump
 /config/*.secret.exs
 .elixir_ls/
 input/*.txt
+
+build/
+bin/
+.cache/
