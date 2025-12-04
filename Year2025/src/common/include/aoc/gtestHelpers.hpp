@@ -91,7 +91,8 @@ public:
   }
 };
 
-inline int runUnitTests(int argc, char **argv, const std::string &testName) {
+inline int runUnitTests(int argc, char **argv, const std::string &testName,
+                        bool disabled = false) {
   auto file_sink = std::make_shared<spdlog::sinks::basic_file_sink_mt>(
       fmt::format("logs/{}/error.log", testName), true);
   file_sink->set_pattern("%v");
@@ -113,6 +114,11 @@ inline int runUnitTests(int argc, char **argv, const std::string &testName) {
       testing::UnitTest::GetInstance()->listeners();
   listeners.Append(new SpdlogTestListener());
   listeners.Append(new aoc::SelectiveLogFlushListener(buffered_sink));
+
+  if (disabled) {
+    std::cerr << "disabling" << std::endl;
+    testing::GTEST_FLAG(filter) = fmt::format("-{}*", testName);
+  }
 
   return RUN_ALL_TESTS();
 }
