@@ -6,12 +6,12 @@
 #include <tuple>
 using namespace Day01;
 
-TEST(Day01, DISABLED_Part1) {
+TEST(Day01, Part1) {
   int output = Day01::solve("./input/day01/part1.test.txt", true);
   EXPECT_EQ(3, output);
 }
 
-TEST(Day01, DISABLED_Part1_Actual) {
+TEST(Day01, Part1_Actual) {
   int output = solve("./input/day01/part1.txt", true);
   EXPECT_EQ(969, output);
 }
@@ -53,7 +53,7 @@ std::tuple<int, int, Output> _(int cur, int move, int expectedNew,
 }
 // clang-format off
 // 3. Instantiate the Test Suite
-INSTANTIATE_TEST_SUITE_P(Part2Solvers, TestSolvePart2, testing::Values(
+INSTANTIATE_TEST_SUITE_P(Day01_Part2Solvers, TestSolvePart2, testing::Values(
    _(50, -68, 82, 1)
   ,_(82, 30, 12, 1)
   ,_(82, 130, 12, 2)
@@ -73,5 +73,5 @@ INSTANTIATE_TEST_SUITE_P(Part2Solvers, TestSolvePart2, testing::Values(
 // clang-format on
 
 int main(int argc, char **argv) {
-  return aoc::runUnitTests(argc, argv, "day1");
+  return aoc::runUnitTests(argc, argv, "Day01", true);
 }

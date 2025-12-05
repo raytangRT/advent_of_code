@@ -4,6 +4,7 @@
 #include "spdlog/sinks/base_sink.h"
 #include "spdlog/sinks/basic_file_sink.h"
 #include "gtest/gtest.h"
+#include <initializer_list>
 #include <memory>
 #include <spdlog/logger.h>
 #include <spdlog/spdlog.h>
@@ -91,7 +92,22 @@ public:
   }
 };
 
-inline int runUnitTests(int argc, char **argv, const std::string &testName) {
+class TestingEnvironment : public testing::Environment {
+private:
+  bool m_skipped = false;
+
+public:
+  TestingEnvironment(bool skipping) : m_skipped(skipping) {}
+
+  void SetUp() override {
+    if (m_skipped) {
+      GTEST_SKIP() << " tests disabled";
+    }
+  }
+};
+
+inline int runUnitTests(int argc, char **argv, const std::string &testName,
+                        bool disabled = false) {
   auto file_sink = std::make_shared<spdlog::sinks::basic_file_sink_mt>(
       fmt::format("logs/{}/error.log", testName), true);
   file_sink->set_pattern("%v");
@@ -112,8 +128,15 @@ inline int runUnitTests(int argc, char **argv, const std::string &testName) {
   testing::TestEventListeners &listeners =
       testing::UnitTest::GetInstance()->listeners();
   listeners.Append(new SpdlogTestListener());
-  listeners.Append(new aoc::SelectiveLogFlushListener(buffered_sink));
+  listeners.Append(new SelectiveLogFlushListener(buffered_sink));
+
+  testing::AddGlobalTestEnvironment(new TestingEnvironment(disabled));
 
   return RUN_ALL_TESTS();
+}
+
+template <typename T>
+inline auto test_params(const std::initializer_list<T> params) {
+  return testing::ValuesIn(params);
 }
 } // namespace aoc

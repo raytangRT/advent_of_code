@@ -8,7 +8,8 @@ erl_crash.dump
 *.beam
 /config/*.secret.exs
 .elixir_ls/
-input/*.txt
+
+Year*/Input/
 
 build/
 bin/

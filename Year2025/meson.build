@@ -13,7 +13,7 @@ project('aoc-2025', 'cpp',
 # --------------------------------------------------
 gtest_proj = subproject('gtest')
 gtest_dep      = gtest_proj.get_variable('gtest_dep')
-gtest_main_dep = gtest_proj.get_variable('gtest_main_dep')
+gmock_dep      = gtest_proj.get_variable('gmock_dep')  # Add this line
 
 fmt = subproject('fmt')
 fmt_dep = fmt.get_variable('fmt_dep')
@@ -56,7 +56,7 @@ foreach i : range(1, 26)
       day_name + '_test',
       'src'/day_name/'test.cpp',
       input_symlink,
-      dependencies : [common_dep, gtest_dep, fmt_dep, spdlog_dep],
+      dependencies : [common_dep, gtest_dep, fmt_dep, spdlog_dep, gmock_dep],
       override_options : ['cpp_std=c++23'],
     )
 
