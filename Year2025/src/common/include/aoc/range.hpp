@@ -1,0 +1,39 @@
+#pragma once
+
+#include <iostream>
+#include <ostream>
+#include <vector>
+
+namespace aoc {
+struct Range {
+  long begin;
+  long end;
+
+  void merge(const Range &other);
+  bool overlaps_with(const Range &other) const;
+  bool is_inrange(const long &v) const;
+  long numOfElements() const { return end - begin + 1; }
+
+  friend std::ostream &operator<<(std::ostream &os, const Range &r) {
+    return os << "[" << r.begin << "-" << r.end << "]";
+  }
+};
+
+struct Ranges {
+  std::vector<Range> ranges;
+
+  void insert(Range);
+
+  auto begin() const { return ranges.begin(); }
+
+  auto end() const { return ranges.end(); }
+
+  friend std::ostream &operator<<(std::ostream &os, const Ranges &rngs) {
+    for (const auto &r : rngs.ranges) {
+      os << r << ", ";
+    }
+    return os << std::endl;
+  }
+};
+
+} // namespace aoc
