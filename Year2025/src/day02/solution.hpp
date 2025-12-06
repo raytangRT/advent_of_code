@@ -1,6 +1,5 @@
 #include "aoc/fileHelpers.hpp"
 #include "aoc/stringHelper.hpp"
-#include "fmt/base.h"
 #include "spdlog/spdlog.h"
 #include <cstddef>
 #include <format>
