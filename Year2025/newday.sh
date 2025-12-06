@@ -31,7 +31,7 @@ TEST($DAY, DISABLED_Part1Actual) {
 }
 
 TEST($DAY, DISABLED_Part2DEMO) {
-  long output = solve(true, true);
+  long output = solve(true, false);
   EXPECT_EQ(output, 13);
 }
 
@@ -46,16 +46,16 @@ int main(int argc, char *argv[]) {
 EOF
 
 cat >"src/$DAY/solution.hpp" <<EOF
-#include <iostream>
+#include "aoc/aoc.hpp"
 
 namespace $DAY {
 
-inline long solve(bool testing = true, bool part2 = false) {
+inline long solve(bool testing = true, [[gnu::unused]] bool part2 = false) {
   std::string filePath = "./input/$DAY/input.test.txt";
   if (!testing) {
     filePath = "./input/$DAY/input.txt";
   }
-  std::cout << testing << part2;
+
   return 0;
 }
 }
