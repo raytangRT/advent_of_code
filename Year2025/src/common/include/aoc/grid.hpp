@@ -31,6 +31,12 @@ public:
 
   void set(const RowIdx, const ColIdx, const char &);
 
-  std::vector<char> neighbors(RowIdx, ColIdx) const;
+  const std::vector<char> neighbors(RowIdx, ColIdx) const;
+
+  std::vector<char> &operator[](const RowIdx);
+  const std::vector<char> &operator[](const RowIdx) const;
+
+  size_t width() const;
+  size_t height() const;
 };
 } // namespace aoc

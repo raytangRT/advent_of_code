@@ -1,4 +1,5 @@
 #include "fileHelpers.hpp"
+#include "graph.hpp"
 #include "grid.hpp"
 #include "numberHelpers.hpp"
 #include "range.hpp"

@@ -31,7 +31,7 @@ TEST($DAY, DISABLED_Part1Actual) {
 }
 
 TEST($DAY, DISABLED_Part2DEMO) {
-  long output = solve(true, false);
+  long output = solve(true, true);
   EXPECT_EQ(output, 13);
 }
 
