@@ -26,12 +26,12 @@ Grid::Grid(const std::string &filePath) {
 void Grid::printGrid() const {
   for (size_t i = 0; i < m_height; i++) {
     for (size_t j = 0; j < m_width; j++) {
-      std::cout << m_grid[i][j];
+      std::cerr << m_grid[i][j];
     }
-    std::cout << std::endl;
+    std::cerr << std::endl;
   }
 }
-std::vector<char> Grid::neighbors(RowIdx row, ColIdx col) const {
+const std::vector<char> Grid::neighbors(RowIdx row, ColIdx col) const {
   std::vector<char> result;
 
   const std::vector dirs = {
@@ -39,13 +39,11 @@ std::vector<char> Grid::neighbors(RowIdx row, ColIdx col) const {
       {1, -1},           {1, 0},  {1, 1}};
 
   for (auto [dr, dc] : dirs) {
-    auto nr = static_cast<std::make_signed_t<RowIdx>>(row) + dr;
-    auto nc = static_cast<std::make_signed_t<ColIdx>>(col) + dc;
+    auto nr = row + dr;
+    auto nc = col + dc;
 
-    if (nr >= 0 && nr < static_cast<decltype(nr)>(m_height) && nc >= 0 &&
-        nc < static_cast<decltype(nc)>(m_width)) {
-      result.push_back(
-          m_grid[static_cast<RowIdx>(nr)][static_cast<ColIdx>(nc)]);
+    if (nr >= 0 && nr < m_height && nc >= 0 && nc < m_width) {
+      result.push_back(m_grid[nr][nc]);
     }
   }
   return result;
@@ -56,4 +54,24 @@ void Grid::set(const RowIdx rowIdx, const ColIdx colIdx, const char &value) {
     m_grid[rowIdx][colIdx] = value;
   }
 }
+
+std::vector<char> &Grid::operator[](const RowIdx rowIdx) {
+  if (rowIdx < 0 || rowIdx >= m_height) {
+    // Handle out-of-bounds access, e.g., throw an exception
+    throw std::out_of_range("Index out of bounds");
+  }
+  return m_grid[rowIdx];
+}
+
+const std::vector<char> &Grid::operator[](const RowIdx rowIdx) const {
+  if (rowIdx < 0 || rowIdx >= m_height) {
+    // Handle out-of-bounds access, e.g., throw an exception
+    throw std::out_of_range("Index out of bounds");
+  }
+  return m_grid[rowIdx];
+}
+
+size_t Grid::width() const { return m_width; }
+size_t Grid::height() const { return m_height; }
+
 } // namespace aoc
