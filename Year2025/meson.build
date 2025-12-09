@@ -21,6 +21,9 @@ fmt_dep = fmt.get_variable('fmt_dep')
 spdlog_proj = subproject('spdlog')
 spdlog_dep = spdlog_proj.get_variable('spdlog_dep')
 
+abseilcpp_proj = subproject('abseil-cpp')
+abseilcpp_hash_dep = abseilcpp_proj.get_variable('absl_hash_dep')
+
 # --------------------------------------------------
 # Common code (optional but recommended)
 # --------------------------------------------------
@@ -55,7 +58,8 @@ foreach i : range(1, 26)
     test_exe = executable(
       day_name + '_test',
       'src'/day_name/'test.cpp',
-      dependencies : [common_dep, gtest_dep, fmt_dep, spdlog_dep, gmock_dep],
+      cpp_args: ['-Wno-nullability-extension'],
+      dependencies : [common_dep, gtest_dep, fmt_dep, spdlog_dep, gmock_dep, abseilcpp_hash_dep],
       override_options : ['cpp_std=c++23'],
     )
 

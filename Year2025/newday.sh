@@ -25,17 +25,20 @@ TEST($DAY, Part1DEMO) {
   EXPECT_EQ(output, 13);
 }
 
-TEST($DAY, DISABLED_Part1Actual) {
+TEST($DAY, Part1Actual) {
+  GTEST_SKIP();
   long output = solve(false);
   EXPECT_EQ(output, 13);
 }
 
-TEST($DAY, DISABLED_Part2DEMO) {
+TEST($DAY, Part2DEMO) {
+  GTEST_SKIP();
   long output = solve(true, true);
   EXPECT_EQ(output, 13);
 }
 
-TEST($DAY, DISABLED_Part2Actual) {
+TEST($DAY, Part2Actual) {
+  GTEST_SKIP();
   long output = solve(false, true);
   EXPECT_EQ(output, 13);
 }
