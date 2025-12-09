@@ -1,4 +1,5 @@
 #pragma once
+#include "aoc/points.hpp"
 #include "fmt/format.h"
 #include <functional>
 #include <memory>
@@ -7,26 +8,6 @@
 #include <unordered_map>
 
 namespace aoc {
-
-struct Point {
-  int x;
-  int y;
-
-  // fmt::format support
-  friend auto format_as(const Point &p) {
-    return fmt::format("({},{})", p.x, p.y);
-  }
-
-  Point(int x, int y) : x(x), y(y) {}
-  Point(size_t x, size_t y) : x(x), y(y) {}
-
-  constexpr bool operator==(const Point &other) const = default;
-  constexpr auto operator<=>(const Point &other) const = default;
-
-  friend std::ostream &operator<<(std::ostream &os, const Point &ptr) {
-    return os << fmt::format("pt{{{},{}}}", ptr.x, ptr.y);
-  }
-};
 
 template <typename T> struct GraphNode {
   std::vector<std::shared_ptr<GraphNode<T>>> children;
@@ -90,10 +71,3 @@ public:
   std::shared_ptr<GraphNode<T>> root() { return m_root; }
 };
 } // namespace aoc
-
-// Hash specialization for Point
-template <> struct std::hash<aoc::Point> {
-  std::size_t operator()(const aoc::Point &p) const {
-    return std::hash<int>{}(p.x) ^ (std::hash<int>{}(p.y) << 1);
-  }
-};
