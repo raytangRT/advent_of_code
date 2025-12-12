@@ -17,8 +17,8 @@ struct Point {
 
   Point(int x, int y) : x(x), y(y) {}
   Point(size_t x, size_t y) : x(x), y(y) {}
+  Point(long x, long y) : x(x), y(y) {}
 
-  constexpr bool operator==(const Point &other) const = default;
   constexpr auto operator<=>(const Point &other) const = default;
 
   friend std::ostream &operator<<(std::ostream &os, const Point &p) {
@@ -66,5 +66,25 @@ template <> struct std::hash<aoc::Point3d> {
   std::size_t operator()(const aoc::Point3d &p) const {
     return std::hash<int>{}(p.x) ^ (std::hash<int>{}(p.y) << 1) ^
            (std::hash<int>{}(p.z) << 4);
+  }
+};
+
+template <> struct std::formatter<aoc::Point> : std::formatter<std::string> {
+  // The parse() method is required to handle format specifiers (e.g., in
+  // "{:...}")
+  constexpr auto parse(std::format_parse_context &ctx) {
+    // We can reuse the string formatter's parse function if we convert to a
+    // string internally
+    return std::formatter<std::string>::parse(ctx);
+  }
+
+  // The format() method is required to convert the custom type to a string
+  auto format(const aoc::Point &p, std::format_context &ctx) const {
+    // Use std::format to create the desired string representation
+    std::string s = std::format("[{}, {}]", p.x, p.y);
+
+    // Delegate the actual formatting to the base string formatter,
+    // which handles alignment, padding, etc.
+    return std::formatter<std::string>::format(s, ctx);
   }
 };

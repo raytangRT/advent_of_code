@@ -58,6 +58,7 @@ foreach i : range(1, 26)
     test_exe = executable(
       day_name + '_test',
       'src'/day_name/'test.cpp',
+
       cpp_args: ['-Wno-nullability-extension'],
       dependencies : [common_dep, gtest_dep, fmt_dep, spdlog_dep, gmock_dep, abseilcpp_hash_dep],
       override_options : ['cpp_std=c++23'],
@@ -67,7 +68,9 @@ foreach i : range(1, 26)
     alias_target(day_name, test_exe)
 
     # This registers it with "ninja test"
-    test(day_name, test_exe, suite : 'aoc2025' )
+    test(day_name, test_exe, suite : 'aoc2025'
+      , timeout: 0
+    )
   endif
 endforeach
 

@@ -5,8 +5,9 @@
 
 namespace Day04 {
 
+using Grid = aoc::Grid<char>;
 inline std::vector<std::pair<aoc::RowIdx, aoc::ColIdx>>
-countPart1(const aoc::Grid &grid) {
+countPart1(const Grid &grid) {
   std::vector<std::pair<aoc::RowIdx, aoc::ColIdx>> result;
   grid.forEach([&](const aoc::RowIdx rowIdx, const aoc::ColIdx colIdx,
                    const char &value) {
@@ -23,7 +24,7 @@ countPart1(const aoc::Grid &grid) {
 
   return result;
 }
-inline long countPart2(aoc::Grid &grid) {
+inline long countPart2(Grid &grid) {
   long rowCount = 0;
   auto toRemove = countPart1(grid);
   while (toRemove.size() > 0) {
@@ -42,7 +43,7 @@ inline long solve(bool testing = true, bool part2 = false) {
     filePath = "./input/Day04/input.txt";
   }
 
-  aoc::Grid grid(filePath);
+  Grid grid(filePath);
   long rowCount = 0;
 
   if (!part2) {

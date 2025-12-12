@@ -2,7 +2,6 @@
 
 common_src = [
   'src/input.cpp',
-  'src/grid.cpp',
   'src/util.cpp',
   'src/range.cpp'
   # add more as you go
