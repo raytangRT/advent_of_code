@@ -11,7 +11,9 @@
 
 namespace day07 {
 
-inline long countPart1(aoc::Grid &grid) {
+using Grid = aoc::Grid<char>;
+
+inline long countPart1(Grid &grid) {
   long splitCount = 0;
   for (aoc::RowIdx i = 1; i < grid.height(); i++) {
     for (aoc::ColIdx j = 0; j < grid.width(); j++) {
@@ -45,7 +47,7 @@ inline long countPart1(aoc::Grid &grid) {
   return splitCount;
 }
 
-inline long countPart2(aoc::Grid &grid) {
+inline long countPart2(Grid &grid) {
   aoc::Graph<long> graph;
 
   for (aoc::RowIdx i = 0; i < grid.height(); i++) {
@@ -124,7 +126,7 @@ inline long solve(bool testing = true, [[gnu::unused]] bool part2 = false) {
     filePath = "./input/day07/input.txt";
   }
 
-  aoc::Grid grid(filePath);
+  Grid grid(filePath);
 
   long splitCount = 0;
 

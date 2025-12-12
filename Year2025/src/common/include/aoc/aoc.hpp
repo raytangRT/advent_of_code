@@ -5,3 +5,5 @@
 #include "points.hpp"
 #include "range.hpp"
 #include "stringHelper.hpp"
+
+#include "rangeHelpers.hpp"

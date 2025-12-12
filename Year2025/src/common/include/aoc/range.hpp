@@ -37,3 +37,22 @@ struct Ranges {
 };
 
 } // namespace aoc
+template <> struct std::formatter<aoc::Range> : std::formatter<std::string> {
+  // The parse() method is required to handle format specifiers (e.g., in
+  // "{:...}")
+  constexpr auto parse(std::format_parse_context &ctx) {
+    // We can reuse the string formatter's parse function if we convert to a
+    // string internally
+    return std::formatter<std::string>::parse(ctx);
+  }
+
+  // The format() method is required to convert the custom type to a string
+  auto format(const aoc::Range &p, std::format_context &ctx) const {
+    // Use std::format to create the desired string representation
+    std::string s = std::format("[{}, {}]", p.begin, p.end);
+
+    // Delegate the actual formatting to the base string formatter,
+    // which handles alignment, padding, etc.
+    return std::formatter<std::string>::format(s, ctx);
+  }
+}; // namespace aoc
