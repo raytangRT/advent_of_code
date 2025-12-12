@@ -5,6 +5,7 @@
 #include <cstddef>
 #include <format>
 #include <iostream>
+#include <ranges>
 #include <unordered_set>
 #include <vector>
 
@@ -75,8 +76,8 @@ inline long part2Solver(std::vector<aoc::Point> &points) {
     for (size_t j = 0; j < i; j++) {
       const aoc::Point &p2 = points[j];
       if (p1.x != p2.x && p1.y != p2.y) {
-        double x1 = std::min(p1.x, p2.x), x2 = std::max(p1.x, p2.x),
-               y1 = std::min(p1.y, p2.y), y2 = std::max(p1.y, p2.y);
+        int x1 = std::min(p1.x, p2.x), x2 = std::max(p1.x, p2.x),
+            y1 = std::min(p1.y, p2.y), y2 = std::max(p1.y, p2.y);
         aoc::Point p3{x1, y2};
         aoc::Point p4{x2, y1};
         aoc::Point center{(x1 + x2) / 2, (y1 + y2) / 2};
@@ -90,6 +91,85 @@ inline long part2Solver(std::vector<aoc::Point> &points) {
   }
 
   return maxSize;
+}
+// Helper to get min/max for a pair of points
+struct Bounds {
+  long long min_x, max_x, min_y, max_y;
+};
+
+inline Bounds get_bounds(const aoc::Point &a, const aoc::Point &b) {
+  return {std::min(a.x, b.x), std::max(a.x, b.x), std::min(a.y, b.y),
+          std::max(a.y, b.y)};
+}
+
+inline long part2SolverV2(std::vector<aoc::Point> &points) {
+  size_t n = points.size();
+  auto calculateSize = [](const aoc::Point &p1, const aoc::Point &p2) {
+    auto width = abs(p1.x - p2.x) + 1;
+    auto height = abs(p1.y - p2.y) + 1;
+    return width * height;
+  };
+
+  struct Edge {
+    aoc::Point p1, p2;
+  };
+
+  struct Candidate {
+    long long area;
+    aoc::Point p1, p2; // p1 is the "top-left-ish", p2 "bottom-right-ish"
+  };
+
+  std::vector<Edge> edges;
+  edges.reserve(n);
+  for (size_t i = 0; i < n; i++) {
+    edges.emplace_back(points[i], points[(i + n - 1) % n]);
+  }
+
+  std::vector<Candidate> candidates;
+  candidates.reserve(n * (n - 1) / 2);
+
+  for (size_t i = 0; i < n; ++i) {
+    for (size_t j = i + 1; j < n; ++j) {
+      aoc::Point a = points[i];
+      aoc::Point b = points[j];
+      long long area = calculateSize(a, b);
+      if (a.x > b.x || (a.x == b.x && a.y > b.y)) {
+        std::swap(a, b);
+      }
+      candidates.push_back({area, a, b});
+    }
+  }
+  //
+  // Sort descending by area
+  std::sort(
+      candidates.begin(), candidates.end(),
+      [](const Candidate &a, const Candidate &b) { return a.area > b.area; });
+  // Check each candidate from largest to smallest
+  for (const auto &cand : candidates) {
+    const auto rect = get_bounds(cand.p1, cand.p2);
+    // Rectangle interior: (rect.min_x, rect.min_y) to (rect.max_x, rect.max_y)
+    // Strictly inside: x > min_x && x < max_x, same for y
+
+    bool crossed = false;
+    for (const auto &edge : edges) {
+      const auto eb = get_bounds(edge.p1, edge.p2);
+
+      // Does this edge cross strictly through the interior both horizontally
+      // and vertically?
+      bool spans_x = (eb.max_x > rect.min_x) && (eb.min_x < rect.max_x);
+      bool spans_y = (eb.max_y > rect.min_y) && (eb.min_y < rect.max_y);
+
+      if (spans_x && spans_y) {
+        crossed = true;
+        break;
+      }
+    }
+
+    if (!crossed) {
+      return cand.area; // No boundary edge crosses interior → valid and largest
+    }
+  }
+  return 0;
 }
 
 inline long solve(bool testing = true, [[gnu::unused]] bool part2 = false) {
@@ -111,7 +191,7 @@ inline long solve(bool testing = true, [[gnu::unused]] bool part2 = false) {
   if (!part2) {
     return part1Solver(points);
   } else {
-    return part2Solver(points);
+    return part2SolverV2(points);
   }
 }
 } // namespace day09

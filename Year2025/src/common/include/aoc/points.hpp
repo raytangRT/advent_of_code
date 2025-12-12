@@ -8,8 +8,8 @@
 namespace aoc {
 
 struct Point {
-  double x;
-  double y;
+  int x;
+  int y;
 
   friend std::string format_as(const Point &p) {
     return fmt::format("({},{})", p.x, p.y);
@@ -18,7 +18,6 @@ struct Point {
   Point(int x, int y) : x(x), y(y) {}
   Point(size_t x, size_t y) : x(x), y(y) {}
   Point(long x, long y) : x(x), y(y) {}
-  Point(double x, double y) : x(x), y(y) {}
 
   constexpr auto operator<=>(const Point &other) const = default;
 
