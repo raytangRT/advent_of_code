@@ -11,6 +11,7 @@ common_lib = static_library(
   'common',
   common_src,
   include_directories: include_directories('include'),
+  dependencies : [ abseilcpp_hash_dep],
   cpp_args: ['-DAOC_BUILD'],
 )
 

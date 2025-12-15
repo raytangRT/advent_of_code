@@ -4,27 +4,36 @@
 #include <functional>
 #include <numeric>
 #include <optional>
+#include <queue>
 #include <ranges>
+#include <string>
 namespace aoc {
-
 template <class T, class Op> struct accumulate_closure {
   T init;
   Op op;
 
-  template <std::ranges::input_range R> auto operator()(R &&r) const {
+  // Perfect forwarding of the range
+  template <std::ranges::input_range R>
+  constexpr auto operator()(R &&r) const
+      noexcept(noexcept(std::accumulate(std::begin(r), std::end(r), init,
+                                        op))) {
     using std::begin, std::end;
-    return std::accumulate(begin(r), end(r), init, op);
+    return std::accumulate(begin(r), end(r), init, std::ref(op)); // important!
   }
 };
 
 struct accumulate_t {
+  // Allow perfect forwarding of init and op
   template <class T, class Op = std::plus<>>
-  auto operator()(T init, Op op = {}) const {
-    return accumulate_closure<T, Op>{std::move(init), std::move(op)};
+  constexpr auto operator()(T &&init, Op &&op = {}) const
+      noexcept(std::is_nothrow_move_constructible_v<T> &&
+               std::is_nothrow_move_constructible_v<Op>) {
+    return accumulate_closure<std::decay_t<T>, std::decay_t<Op>>{
+        std::forward<T>(init), std::forward<Op>(op)};
   }
 };
 
-inline constexpr accumulate_t accumulate;
+inline constexpr accumulate_t accumulate{};
 
 template <std::ranges::viewable_range R, class T, class Op>
 auto operator|(R &&r, const accumulate_closure<T, Op> &c) {
@@ -62,4 +71,44 @@ inline std::optional<std::pair<T, T>> find_boundary(const std::vector<T> &input,
 
   return std::make_pair(*std::prev(lowerBound), *upperBound);
 }
+
+struct stoi_fn {
+  int operator()(const std::string &input) { return std::stoi(input); }
+};
+
+inline constexpr stoi_fn stoi;
+
+template <typename T> T pop(std::queue<T> &queue) {
+  T value = queue.front();
+  queue.pop();
+  return value;
+}
+
+template <typename TIn, typename TOut> struct cast_fn {
+  TOut operator()(const TIn &in) { return (TOut)in; }
+};
+
+template <typename TIn, typename TOut> inline constexpr cast_fn<TIn, TOut> cast;
+
+template <typename T> std::vector<T> pop_all(std::queue<T> &queue) {
+  std::vector<T> result;
+  while (!queue.empty()) {
+    result.push_back(aoc::pop(queue));
+  }
+  return result;
+}
+
+template <std::ranges::viewable_range R> auto enumerate(R &&r) {
+  using std::ranges::distance;
+  using std::views::iota;
+  using std::views::zip;
+
+  if constexpr (std::ranges::sized_range<R>) {
+    auto d = distance(r);
+    return zip(iota(0, d), std::forward<R>(r)); // bounded iota for sized ranges
+  } else {
+    return zip(iota(0), std::forward<R>(r)); // unbounded iota for others
+  }
+}
+
 } // namespace aoc
