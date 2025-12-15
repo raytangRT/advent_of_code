@@ -25,5 +25,5 @@ TEST(day09, Part2Actual) {
 }
 
 int main(int argc, char *argv[]) {
-  return aoc::runUnitTests(argc, argv, "day09");
+  return aoc::runUnitTests(argc, argv, "day09", true);
 }

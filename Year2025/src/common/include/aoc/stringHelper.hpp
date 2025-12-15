@@ -1,4 +1,6 @@
+#include <iterator>
 #include <ranges>
+#include <regex>
 #include <sstream>
 #include <string>
 #include <vector>
@@ -58,4 +60,26 @@ inline void trim(std::string &s) {
   ltrim(s);
   rtrim(s);
 }
+
+class RegexMatchers {
+private:
+  std::regex m_regex;
+  std::string m_input;
+
+public:
+  RegexMatchers(const std::string &regex, const std::string &str)
+      : m_regex(regex), m_input(str) {}
+
+  RegexMatchers(const std::regex &regex, const std::string &str)
+      : m_regex(regex), m_input(str) {}
+
+  std::sregex_iterator begin() const {
+    return std::sregex_iterator(m_input.begin(), m_input.end(), m_regex);
+  }
+
+  std::sregex_iterator end() const { return std::sregex_iterator{}; }
+
+  size_t count() const { return std::distance(begin(), end()); }
+};
+
 } // namespace aoc
