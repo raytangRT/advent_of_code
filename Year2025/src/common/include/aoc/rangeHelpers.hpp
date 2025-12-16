@@ -7,6 +7,7 @@
 #include <queue>
 #include <ranges>
 #include <string>
+#include <unordered_map>
 namespace aoc {
 template <class T, class Op> struct accumulate_closure {
   T init;
@@ -109,6 +110,21 @@ template <std::ranges::viewable_range R> auto enumerate(R &&r) {
   } else {
     return zip(iota(0), std::forward<R>(r)); // unbounded iota for others
   }
+}
+template <typename TKey, typename TValue>
+TValue getOr(const std::unordered_map<TKey, TValue> &map, const TKey &key,
+             const TValue &defaultValue) {
+  return getOr(map, key, [&]() { return defaultValue; });
+}
+template <typename TKey, typename TValue, typename Fn>
+TValue getOr(const std::unordered_map<TKey, TValue> &map, const TKey &key,
+             Fn &&fn)
+  requires std::invocable<Fn>
+{
+  if (auto found = map.find(key); found != map.end()) {
+    return found->second;
+  }
+  return std::forward<Fn>(fn)();
 }
 
 } // namespace aoc
