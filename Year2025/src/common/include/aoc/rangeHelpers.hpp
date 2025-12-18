@@ -78,6 +78,12 @@ struct stoi_fn {
 };
 
 inline constexpr stoi_fn stoi;
+struct stoul_fn {
+  size_t operator()(const std::string &input) {
+    return (size_t)std::stoul(input);
+  }
+};
+inline constexpr stoul_fn stoul;
 
 template <typename T> T pop(std::queue<T> &queue) {
   T value = queue.front();
@@ -127,4 +133,11 @@ TValue getOr(const std::unordered_map<TKey, TValue> &map, const TKey &key,
   return std::forward<Fn>(fn)();
 }
 
+// Generic pipe operator
+template <typename T, typename Function>
+  requires(std::invocable<Function, T>)
+constexpr auto operator|(T &&t, Function &&f)
+    -> std::invoke_result_t<Function, T> {
+  return std::invoke(std::forward<Function>(f), std::forward<T>(t));
+}
 } // namespace aoc
