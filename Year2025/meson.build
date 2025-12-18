@@ -72,7 +72,7 @@ foreach i : range(1, 26)
 
     # This registers it with "ninja test"
     test(day_name, test_exe, suite : 'aoc2025'
-      # , timeout: 0
+      , timeout: 0
     )
   endif
 endforeach
