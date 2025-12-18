@@ -47,9 +47,8 @@ input_symlink = ''
 if fs.exists('input')
   input_symlink = custom_target('symlink-input',
     output: 'input',
-    command: ['ln', '-sfn', meson.source_root() / 'input', '@OUTDIR@/input'],
+    command: ['ln', '-sfn', meson.project_source_root() / 'input', '@OUTDIR@/input'],
     build_by_default: true,
-    console: true,
   )
 endif
 
@@ -68,12 +67,12 @@ foreach i : range(1, 26)
     )
 
     # This makes "ninja day01" run the tests for day 01
-    alias_target(day_name, test_exe)
+    run_target(day_name,
+      command: [test_exe]
+    )
 
     # This registers it with "ninja test"
-    test(day_name, test_exe, suite : 'aoc2025'
-      , timeout: 0
-    )
+    test(day_name, test_exe, suite : 'aoc2025')
   endif
 endforeach
 
