@@ -14,3 +14,8 @@ Year*/Input/
 build/
 bin/
 .cache/
+
+Year2025/subprojects/*
+
+# But keep the .wrap files
+!Year2025/subprojects/*.wrap
